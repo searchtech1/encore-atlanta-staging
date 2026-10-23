@@ -22,7 +22,8 @@ export async function onRequestPost({ request, env }) {
   const lead = {};
   for (const k of FIELDS) lead[k] = String(data[k] || '').trim().slice(0, 200);
   const digits = lead.phone.replace(/\D/g, '');
-  if (!lead.name || digits.length < 10) return json({ ok: false, error: 'invalid' }, 400);
+  const phoneOk = /^[\d\s().+-]{10,20}$/.test(lead.phone) && digits.length >= 10 && digits.length <= 11;
+  if (!lead.name || !phoneOk) return json({ ok: false, error: 'invalid' }, 400);
 
   lead.received_at = new Date().toISOString();
   lead.country = request.cf && request.cf.country || '';
