@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- STAGING PREVIEW: keep out of search results -->
-<meta name="robots" content="noindex, nofollow, noarchive">
 <title>Salon Suites in West Midtown Atlanta, $150/Week Move-In | Encore Salon Suites</title>
 <meta name="description" content="Your own private salon suite in West Midtown Atlanta for $150 a week. Secure 24/7 access, shampoo bowl, color station, free parking. Suites available next day. Book a tour.">
-<link rel="canonical" href="https://encoresalonsuites.com/salon-suites-midtown-atlanta-ga/">
+<link rel="canonical" href="https://midtown.encoresalonsuites.com/">
+<meta property="og:url" content="https://midtown.encoresalonsuites.com/">
 <meta property="og:title" content="Your own salon suite in West Midtown for $150 a week">
 <meta property="og:description" content="Move-in special at Encore Salon Suites West Midtown. Book a tour.">
-<meta property="og:image" content="img/wm-dryer-lounge.jpg">
+<meta property="og:image" content="https://midtown.encoresalonsuites.com/img/wm-dryer-lounge.jpg">
 <meta name="theme-color" content="#2A201D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%232A201D%22/%3E%3Ctext x=%2232%22 y=%2247%22 text-anchor=%22middle%22 font-family=%22Georgia,serif%22 font-size=%2244%22 fill=%22%23F1E2DD%22%3EE%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +22,7 @@
   "@type": "LocalBusiness",
   "name": "Encore Salon Suites West Midtown",
   "description": "Private salon suites for rent for beauty professionals in West Midtown, Atlanta.",
-  "url": "https://encoresalonsuites.com/salon-suites-midtown-atlanta-ga/",
+  "url": "https://midtown.encoresalonsuites.com/",
   "image": "https://encoresalonsuites.com/wp-content/uploads/2024/05/Encore-Salon-Suites-Atlanta-1.jpg",
   "telephone": "+1-404-287-2637",
   "email": "leasingteam@encoresalonsuites.com",
@@ -212,6 +211,8 @@ a{color:inherit}
 .quotes blockquote{margin:0;font-family:var(--serif);font-size:22px;line-height:1.4}
 .quotes cite{display:block;margin-top:10px;font:500 14px var(--sans);font-style:normal;color:var(--mute)}
 
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
 /* Footer: no links */
 .foot{background:var(--espresso);color:#9C8A83;border-top:1px solid rgba(201,160,143,.18);padding:28px 0 104px;font-size:13px}
 .foot p{margin:0}
@@ -320,6 +321,7 @@ a{color:inherit}
             </fieldset>
           </div>
           <input type="hidden" name="source_form" value="hero">
+          <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
           <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="fbclid"><input type="hidden" name="gclid">
           <button class="btn" type="submit">Book my tour</button>
         </form>
@@ -491,6 +493,7 @@ a{color:inherit}
             </fieldset>
           </div>
           <input type="hidden" name="source_form" value="close">
+          <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
           <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="fbclid"><input type="hidden" name="gclid">
           <button class="btn" type="submit">Book my tour</button>
         </form>
@@ -519,9 +522,9 @@ a{color:inherit}
 
 <script>
 (function(){
-  // Where leads go. Empty in the preview. Before launch, set this to the CRM / Gravity Forms
-  // endpoint (POST, form-encoded). Both forms send the same fields plus source_form.
-  var ENDPOINT = '';
+  // Where leads go: the Pages Function at /api/lead stores each lead in Cloudflare KV.
+  // Empty string = demo mode (used on the GitHub Pages staging copy).
+  var ENDPOINT = '/api/lead';
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* Video: muted autoplay loop, captions on by default, sound + pause + CC controls */
