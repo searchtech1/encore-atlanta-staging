@@ -1,7 +1,7 @@
 // POST /api/lead: tour requests from the landing page forms -> Cloudflare KV.
 import { json, readBody, saveLead } from '../_lib/leads.js';
 
-const FIELDS = ['name', 'phone', 'profession', 'source_form', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid'];
+const FIELDS = ['name', 'phone', 'profession', 'source_form', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'event_id'];
 
 export async function onRequestPost({ request, env }) {
   let data;

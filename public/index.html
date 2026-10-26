@@ -12,6 +12,20 @@
 <meta property="og:image" content="https://midtown.encoresalonsuites.com/img/wm-dryer-lounge.jpg">
 <meta name="theme-color" content="#2A201D">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%232A201D%22/%3E%3Ctext x=%2232%22 y=%2247%22 text-anchor=%22middle%22 font-family=%22Georgia,serif%22 font-size=%2244%22 fill=%22%23F1E2DD%22%3EE%3C/text%3E%3C/svg%3E">
+<!-- Meta Pixel Code (Encore Salon Suites, ID 1703585404074442) -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1703585404074442');
+fbq('track', 'PageView');
+</script>
+<!-- End Meta Pixel Code -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -258,6 +272,7 @@ a{color:inherit}
 </style>
 </head>
 <body>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1703585404074442&ev=PageView&noscript=1"></noscript>
 <a class="skip" href="#form-hero">Skip to tour request</a>
 
 <header class="top">
@@ -320,7 +335,7 @@ a{color:inherit}
               </div>
             </fieldset>
           </div>
-          <input type="hidden" name="source_form" value="hero">
+          <input type="hidden" name="source_form" value="hero"><input type="hidden" name="event_id">
           <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
           <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="fbclid"><input type="hidden" name="gclid">
           <button class="btn" type="submit">Book my tour</button>
@@ -492,7 +507,7 @@ a{color:inherit}
               </div>
             </fieldset>
           </div>
-          <input type="hidden" name="source_form" value="close">
+          <input type="hidden" name="source_form" value="close"><input type="hidden" name="event_id">
           <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
           <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="fbclid"><input type="hidden" name="gclid">
           <button class="btn" type="submit">Book my tour</button>
@@ -590,7 +605,10 @@ a{color:inherit}
       if (!okPhone) { phone.focus(); return; }
       var btn = form.querySelector('button[type=submit]');
       btn.disabled = true; btn.textContent = 'Sending…';
+      var eventId = 'lead-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+      form.elements.event_id.value = eventId;
       function finish(){
+        if (window.fbq) fbq('track', 'Lead', { content_name: 'West Midtown tour request', content_category: form.elements.profession.value || 'Not given' }, { eventID: eventId });
         var first = name.value.trim().split(/\s+/)[0];
         forms.forEach(function(f){
           var p = f.parentNode, d = p.querySelector('.done');
@@ -610,6 +628,13 @@ a{color:inherit}
           err.textContent = 'Your request did not go through. Try again, or call (404) 287-2637.';
           err.classList.add('on');
         });
+    });
+  });
+
+  // Meta Pixel: Contact when someone taps the phone number or email
+  document.querySelectorAll('a[href^="tel:"], a[href^="mailto:"]').forEach(function(a){
+    a.addEventListener('click', function(){
+      if (window.fbq) fbq('track', 'Contact', { content_name: a.href.indexOf('tel:') === 0 ? 'Phone' : 'Email' });
     });
   });
 
