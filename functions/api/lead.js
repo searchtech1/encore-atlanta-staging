@@ -3,7 +3,7 @@ import { json, readBody, saveLead } from '../_lib/leads.js';
 
 const FIELDS = ['name', 'phone', 'profession', 'source_form', 'utm_source', 'utm_medium', 'utm_campaign', 'fbclid', 'gclid', 'event_id'];
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   let data;
   try { data = await readBody(request); } catch { return json({ ok: false, error: 'bad_request' }, 400); }
 
@@ -18,7 +18,7 @@ export async function onRequestPost({ request, env }) {
 
   lead.source = 'landing-page';
   lead.user_agent = (request.headers.get('user-agent') || '').slice(0, 300);
-  await saveLead(env, request, lead);
+  await saveLead(env, request, lead, waitUntil);
   return json({ ok: true });
 }
 

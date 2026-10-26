@@ -50,7 +50,41 @@ export function normalize(raw) {
   };
 }
 
-export async function saveLead(env, request, lead) {
+const SITE = 'https://midtown.encoresalonsuites.com';
+
+// Escape Discord markdown so visitor input shows literally (mentions are blocked via allowed_mentions)
+const clean = (v, max = 200) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max).replace(/([\\`*_~|>#\[\]()])/g, '\\$1') || '—';
+
+export async function notifyDiscord(env, lead) {
+  if (!env.DISCORD_WEBHOOK_URL) return;
+  const fromAd = lead.fbclid ? 'Meta / Instagram ad' : lead.gclid ? 'Google ad' : (lead.utm_source || '');
+  const fields = [
+    { name: 'Name', value: clean(lead.name), inline: true },
+    { name: 'Phone', value: clean(lead.phone, 40), inline: true },
+    { name: 'Profession', value: clean(lead.profession), inline: true },
+    { name: 'Came from', value: lead.source === 'main-site' ? 'Main website form' : 'Landing page', inline: true },
+  ];
+  if (fromAd) fields.push({ name: 'Ad source', value: clean(fromAd), inline: true });
+  if (lead.email) fields.push({ name: 'Email', value: clean(lead.email), inline: true });
+  if (lead.message) fields.push({ name: 'Message', value: clean(lead.message, 900), inline: false });
+  const body = {
+    username: 'Encore lead alerts',
+    allowed_mentions: { parse: [] },
+    content: 'New West Midtown tour request. Call them back now.',
+    embeds: [{
+      title: 'Tour request · Encore West Midtown',
+      color: 0x8E2C3E,
+      fields,
+      footer: { text: new Date(lead.received_at).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' }) + ' ET' },
+      ...(env.LEADS_VIEW_TOKEN ? { url: `${SITE}/leads/${env.LEADS_VIEW_TOKEN}` } : {}),
+    }],
+  };
+  try {
+    await fetch(env.DISCORD_WEBHOOK_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  } catch (e) { /* alert failures never block lead capture */ }
+}
+
+export async function saveLead(env, request, lead, waitUntil) {
   lead.received_at = new Date().toISOString();
   lead.country = (request.cf && request.cf.country) || '';
   lead.city = (request.cf && request.cf.city) || '';
@@ -58,6 +92,8 @@ export async function saveLead(env, request, lead) {
   await env.LEADS.put(key, JSON.stringify(lead), {
     metadata: { name: lead.name, phone: lead.phone, source: lead.source },
   });
+  const alert = notifyDiscord(env, lead);
+  if (waitUntil) waitUntil(alert); else await alert;
   return key;
 }
 

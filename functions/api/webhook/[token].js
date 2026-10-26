@@ -2,7 +2,7 @@
 // Accepts JSON or form posts in any field layout; normalizes name/phone/email/profession and keeps the raw payload.
 import { json, readBody, normalize, saveLead, tokenOk } from '../../_lib/leads.js';
 
-export async function onRequestPost({ request, env, params }) {
+export async function onRequestPost({ request, env, params, waitUntil }) {
   if (!tokenOk(params.token, env.WEBHOOK_TOKEN)) return json({ ok: false, error: 'not_found' }, 404);
   let raw;
   try { raw = await readBody(request); } catch { return json({ ok: false, error: 'bad_request' }, 400); }
@@ -13,7 +13,7 @@ export async function onRequestPost({ request, env, params }) {
     name: n.name, phone: n.phone, email: n.email, profession: n.profession, message: n.message,
     source: 'main-site', source_form: 'encoresalonsuites.com midtown form',
     raw: raw_text.length > 8000 ? raw_text.slice(0, 8000) + '…' : raw,
-  });
+  }, waitUntil);
   return json({ ok: true });
 }
 
