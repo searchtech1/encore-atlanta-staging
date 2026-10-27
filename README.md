@@ -11,7 +11,7 @@ Built to the SES MGT developer brief (23 Oct 2026): ten blocks, mobile first at 
 - `functions/api/webhook/[token].js`: `POST /api/webhook/<WEBHOOK_TOKEN>` takes leads from Encore's main-site Midtown form (any JSON/form layout)
 - `functions/leads/[token].js`: `GET /leads/<LEADS_VIEW_TOKEN>` private list of all Midtown leads (`?format=csv` to export)
 - `functions/video/[[path]].js`: serves `/video/*` with byte-range support (Pages ignores Range; iOS needs it)
-- Secrets (Pages env): `WEBHOOK_TOKEN`, `LEADS_VIEW_TOKEN`, `DISCORD_WEBHOOK_URL` (#encore-leads alerts) (copies in the macOS keychain, service names `encore-west-midtown-*-token`)
+- Secrets (Pages env): `WEBHOOK_TOKEN`, `LEADS_VIEW_TOKEN`, `DISCORD_WEBHOOK_URL` (#encore-leads alerts), `LEAD_EMAIL_TO` (lead email recipients), `RESEND_API_KEY` (sends from leads@sesmgt.com; email is off until set) (copies in the macOS keychain, service names `encore-west-midtown-*-token`)
 - `.github/workflows/deploy.yml`: every push to `main` deploys to Cloudflare Pages
 
 ## Deploy setup (one time)

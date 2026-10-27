@@ -84,6 +84,45 @@ export async function notifyDiscord(env, lead) {
   } catch (e) { /* alert failures never block lead capture */ }
 }
 
+const escHtml = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Email each lead to Encore via Resend (sesmgt.com is a verified sender). Off until RESEND_API_KEY is set.
+// LEAD_EMAIL_TO: comma-separated recipients (Pages secret/var).
+export async function notifyEmail(env, lead) {
+  const to = String(env.LEAD_EMAIL_TO || '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (!env.RESEND_API_KEY || !to.length) return;
+  const fromAd = lead.fbclid ? 'Meta / Instagram ad' : lead.gclid ? 'Google ad' : (lead.utm_source || '');
+  const when = new Date(lead.received_at).toLocaleString('en-US', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' }) + ' ET';
+  const rows = [
+    ['Name', lead.name], ['Phone', lead.phone], ['Email', lead.email], ['Profession', lead.profession],
+    ['Came from', lead.source === 'main-site' ? 'Main website form' : 'West Midtown landing page'],
+    ['Ad source', fromAd], ['Message', lead.message], ['Received', when],
+  ].filter(([, v]) => v);
+  const tel = String(lead.phone || '').replace(/[^\d+]/g, '');
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#2A201D;line-height:1.5">
+<p style="margin:0 0 6px"><strong>New tour request for Encore West Midtown.</strong></p>
+<p style="margin:0 0 16px;color:#6E5D57">Call them back as soon as you can. The faster the call, the more likely the tour.</p>
+<table cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:15px">${rows.map(([k, v]) =>
+  `<tr><td style="color:#6E5D57;border-bottom:1px solid #F1E2DD">${k}</td><td style="border-bottom:1px solid #F1E2DD"><strong>${
+    k === 'Phone' && tel ? `<a href="tel:${escHtml(tel)}" style="color:#8E2C3E">${escHtml(v)}</a>`
+    : k === 'Email' ? `<a href="mailto:${escHtml(v)}" style="color:#8E2C3E">${escHtml(v)}</a>` : escHtml(v)}</strong></td></tr>`).join('')}</table>
+<p style="margin:18px 0 0;font-size:13px;color:#8C7B75">Sent automatically from the <a href="${SITE}" style="color:#8E2C3E">West Midtown landing page</a> by SES Management.</p></div>`;
+  const text = 'New tour request for Encore West Midtown.\n\n' + rows.map(([k, v]) => `${k}: ${v}`).join('\n');
+  const body = {
+    from: env.LEAD_EMAIL_FROM || 'Encore West Midtown Leads <leads@sesmgt.com>',
+    to,
+    subject: `New tour request: ${String(lead.name || 'West Midtown lead').slice(0, 60)}${lead.profession ? ' (' + String(lead.profession).slice(0, 30) + ')' : ''}`,
+    html, text,
+    ...(lead.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email) ? { reply_to: lead.email } : {}),
+  };
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify(body),
+    });
+    if (!r.ok) console.log('lead email failed', r.status, (await r.text()).slice(0, 300));
+  } catch (e) { console.log('lead email error', String(e)); }
+}
+
 export async function saveLead(env, request, lead, waitUntil) {
   lead.received_at = new Date().toISOString();
   lead.country = (request.cf && request.cf.country) || '';
@@ -92,7 +131,7 @@ export async function saveLead(env, request, lead, waitUntil) {
   await env.LEADS.put(key, JSON.stringify(lead), {
     metadata: { name: lead.name, phone: lead.phone, source: lead.source },
   });
-  const alert = notifyDiscord(env, lead);
+  const alert = Promise.all([notifyDiscord(env, lead), notifyEmail(env, lead)]);
   if (waitUntil) waitUntil(alert); else await alert;
   return key;
 }
