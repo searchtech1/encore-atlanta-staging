@@ -86,8 +86,10 @@ export async function notifyDiscord(env, lead) {
 
 const escHtml = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-// Email each lead to Encore via Resend (sesmgt.com is a verified sender). Off until RESEND_API_KEY is set.
-// LEAD_EMAIL_TO: comma-separated recipients (Pages secret/var).
+// Email each lead to Encore via Resend. Off until RESEND_API_KEY is set.
+// LEAD_EMAIL_TO: comma-separated recipients. LEAD_EMAIL_FROM: sender (default encoresalonsuites@sesmgt.com on SES's verified domain).
+// To send from Encore's own address instead: verify encoresalonsuites.com in THEIR Resend account, then set
+// RESEND_API_KEY to their key and LEAD_EMAIL_FROM to e.g. "Encore Salon Suites <leasingteam@encoresalonsuites.com>". No code change needed.
 export async function notifyEmail(env, lead) {
   const to = String(env.LEAD_EMAIL_TO || '').split(',').map((x) => x.trim()).filter(Boolean);
   if (!env.RESEND_API_KEY || !to.length) return;
@@ -109,7 +111,7 @@ export async function notifyEmail(env, lead) {
 <p style="margin:18px 0 0;font-size:13px;color:#8C7B75">Sent automatically from the <a href="${SITE}" style="color:#8E2C3E">West Midtown landing page</a> by SES Management.</p></div>`;
   const text = 'New tour request for Encore West Midtown.\n\n' + rows.map(([k, v]) => `${k}: ${v}`).join('\n');
   const body = {
-    from: env.LEAD_EMAIL_FROM || 'Encore West Midtown Leads <leads@sesmgt.com>',
+    from: env.LEAD_EMAIL_FROM || 'Encore Salon Suites West Midtown <encoresalonsuites@sesmgt.com>',
     to,
     subject: `New tour request: ${String(lead.name || 'West Midtown lead').slice(0, 60)}${lead.profession ? ' (' + String(lead.profession).slice(0, 30) + ')' : ''}`,
     html, text,
